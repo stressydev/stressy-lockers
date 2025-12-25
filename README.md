@@ -49,7 +49,23 @@ LockerConfig.Lockers = {
         name = "Downtown Vinewood Lockers",
         coords = vector3(244.686, 374.662, 105.738),
         blip = { enabled = true, sprite = 763, color = 70, scale = 0.7 },
-        lockers = GenerateLockers() -- 15 lockers
+        lockers = {
+            { id = 1, price = 25 },
+            { id = 2, price = 25 },
+            { id = 3, price = 25 },
+            { id = 4, price = 25 },
+            { id = 5, price = 25 },
+            { id = 6, price = 25 },
+            { id = 7, price = 25 },
+            { id = 8, price = 25 },
+            { id = 9, price = 25 },
+            { id = 10, price = 25 },
+            { id = 11, price = 50 },
+            { id = 12, price = 50 },
+            { id = 13, price = 50 },
+            { id = 14, price = 50 },
+            { id = 15, price = 50 }
+        }
     }
 }
 ```
