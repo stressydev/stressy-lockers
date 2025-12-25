@@ -1,4 +1,4 @@
-# QBX Rental Lockers (Quick Start)
+# Rental Lockers
 
 A **rental locker system** for QBX + ox_inventory with 3D text interaction, unrent option, and recurring billing.
 
