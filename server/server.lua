@@ -1,5 +1,5 @@
 local LockerConfig = require 'config.shared'
-local Framework = require 'bridge.sv_bridge' -- our QBX/QB bridge
+local Framework = require 'bridge.sv_bridge' 
 local rentedLockers = {}
 
 -- ============================================
@@ -175,4 +175,56 @@ lib.cron.new(LockerConfig.BillingCron, function()
     end
 
     TriggerClientEvent('stressy-lockers:syncLockers', -1, rentedLockers)
+end)
+
+-- ============================================
+-- CALLBACK: GET LOCKERS BY IDENTIFIER
+-- Returns lockers rented by a specific player
+-- Restricted to police/EMS
+-- ============================================
+lib.callback.register('stressy-lockers:getLockersByIdentifier', function(source, identifier)
+    local Player = Framework.GetPlayer(source)
+    local job = Player.PlayerData.job or Player.PlayerData.job.name
+
+    if job ~= 'police' and job ~= 'ambulance' then
+        return false
+    end
+
+    local playerLockers = {}
+
+    for key, data in pairs(rentedLockers) do
+        if data.owner == identifier then
+            playerLockers[key] = {
+                owner = data.owner,
+                price = data.price
+            }
+        end
+    end
+
+    return playerLockers
+end)
+
+
+-- ============================================
+-- CALLBACK: MDT LOCKER DATA
+-- Returns all lockers with owner info for police/MDT
+-- ============================================
+lib.callback.register('stressy-lockers:getAllLockersForMDT', function(source)
+    local Player = Framework.GetPlayer(source)
+    local job = Player.PlayerData.job or Player.PlayerData.job.name
+
+    if job ~= 'police' and job ~= 'ambulance' then
+        return false
+    end
+
+    local lockersInfo = {}
+
+    for key, data in pairs(rentedLockers) do
+        lockersInfo[key] = {
+            owner = data.owner,      -- citizenid/identifier
+            price = data.price,
+        }
+    end
+
+    return lockersInfo
 end)
