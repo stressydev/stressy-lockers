@@ -75,21 +75,43 @@ CreateThread(function()
     end
 end)
 
--- ============================================
--- OPEN MENU
--- ============================================
+
+--- RAID SYSTEM (FOR POLICE JOBS) ---
+-- Generic police raid function
+function AttemptRaid(locationName, lockerId, key)
+    -- This just triggers the existing stash event
+    -- Any warrant checks or custom logic can be handled externally before calling this
+    TriggerServerEvent('stressy-lockers:openStash', locationName, lockerId, key)
+end
+
+
+---- OPEN LOCKER MENU ----
+--------------------------
+
 function OpenLockerMenu(locationIndex)
     local location = LockerConfig.Lockers[locationIndex]
 
     lib.callback('stressy-lockers:getLockers', false, function(lockers)
         activeLockers = lockers or {}
 
+        -- Check if player is police
+        local isPolice = false
+        local PlayerJob = Framework.PlayerData().job or Framework.PlayerData().job.name
+
+        for _, jobName in ipairs(LockerConfig.PoliceJob) do
+            if PlayerJob == jobName then
+                isPolice = true
+                break
+            end
+        end
+
+        local playerId = Framework.PlayerData().citizenid or Framework.PlayerData().identifier
+
         local options = {}
 
         for _, locker in ipairs(location.lockers) do
             local key = locationIndex .. '_' .. locker.id
             local data = activeLockers[key]
-            local playerId = Framework.PlayerData().citizenid or Framework.PlayerData().identifier
             local isMine = data and data.owner == playerId
 
             local lockerActions = {}
@@ -137,12 +159,25 @@ function OpenLockerMenu(locationIndex)
                 }
             end
 
+            -- Build main locker entry
+            local description = '⚪ Available - $' .. locker.price
+            local disabled = false
+
+            if data then
+                if isMine then
+                    description = '🟢 Rented by you'
+                elseif isPolice then
+                    description = '🔴 Occupied - Police can attempt raid'
+                else
+                    description = '🔴 Occupied'
+                    disabled = true
+                end
+            end
+
             options[#options + 1] = {
                 title = 'Locker #' .. locker.id,
-                description = data
-                    and (isMine and '🟢 Rented by you' or '🔴 Occupied')
-                    or '⚪ Available - $' .. locker.price,
-                disabled = data and not isMine,
+                description = description,
+                disabled = disabled,
                 onSelect = function()
                     if isMine then
                         lib.registerContext({
@@ -151,6 +186,9 @@ function OpenLockerMenu(locationIndex)
                             options = lockerActions
                         })
                         lib.showContext('locker_actions_' .. key)
+                    elseif isPolice then
+                        -- Police attempt raid: just call the stash open event
+                        AttemptRaid(location.name, locker.id, key)
                     else
                         RentLocker(locationIndex, locker.id, locker.price)
                     end
@@ -166,6 +204,7 @@ function OpenLockerMenu(locationIndex)
         lib.showContext('locker_menu')
     end)
 end
+
 
 -- ============================================
 -- RENT LOCKER

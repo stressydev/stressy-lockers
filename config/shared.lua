@@ -1,5 +1,6 @@
 return {
     Framework = 'qbx', -- 'qbx' or 'qb'
+    PoliceJob = { 'police' },
     BillingCron = '0 0 * * *', -- every day
     -- examples:
     -- daily: '0 0 * * *'
