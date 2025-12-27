@@ -1,4 +1,5 @@
 return {
+    Framework = 'qbx', -- 'qbx' or 'qb'
     BillingCron = '0 0 * * *', -- every day
     -- examples:
     -- daily: '0 0 * * *'

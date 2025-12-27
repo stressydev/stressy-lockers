@@ -1,7 +1,14 @@
 local LockerConfig = require 'config.shared'
-local activeLockers = {}
+local Framework = require 'bridge.cl_bridge' 
+local LOCKER_TEXT_STYLE = {
+    scale = 0.35,
+    color = vec4(255, 255, 255, 220),
+}
 
--- Blips
+
+-- ============================================
+-- BLIPS
+-- ============================================
 CreateThread(function()
     for _, location in ipairs(LockerConfig.Lockers) do
         if location.blip.enabled then
@@ -17,15 +24,34 @@ CreateThread(function()
     end
 end)
 
-local LOCKER_TEXT_STYLE = {
-    scale = vec2(0.35, 0.35),
-    font = 4,
-    color = vec4(255, 255, 255, 220),
-    enableOutline = true,
-    enableDropShadow = true,
-}
+-- ============================================
+-- 3D Text Helper
+-- ============================================
+function DrawText3D(coords, text, scale, color)
+    local camCoords = GetGameplayCamCoords()
+    local dist = #(coords - camCoords)
+    local fov = (1 / GetGameplayCamFov()) * 100
+    local scaleFactor = scale / dist * fov
+
+    SetTextScale(0.0, scaleFactor)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextColour(color.x, color.y, color.z, color.w)
+    SetTextCentre(true)
+    SetTextDropshadow(0, 0, 0, 0, 55)
+    SetTextEdge(2, 0, 0, 0, 150)
+    SetTextOutline()
+    SetDrawOrigin(coords, 0)
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayText(0.0, 0.0)
+    ClearDrawOrigin()
+end
 
 
+-- ============================================
+-- MAIN LOOP
+-- ============================================
 CreateThread(function()
     while true do
         local sleep = 1500
@@ -37,19 +63,8 @@ CreateThread(function()
 
             if dist < 6.0 then
                 sleep = 0
+                DrawText3D(location.coords + vec3(0.0, 0.0, 1.1), '[E] Rental Lockers', LOCKER_TEXT_STYLE.scale, LOCKER_TEXT_STYLE.color)
 
-                -- Draw 3D Text
-                qbx.drawText3d({
-                    text = '[E] Rental Lockers',
-                    coords = location.coords + vec3(0.0, 0.0, 1.1),
-                    scale = LOCKER_TEXT_STYLE.scale,
-                    font = LOCKER_TEXT_STYLE.font,
-                    color = LOCKER_TEXT_STYLE.color,
-                    enableOutline = LOCKER_TEXT_STYLE.enableOutline,
-                    enableDropShadow = LOCKER_TEXT_STYLE.enableDropShadow,
-                })
-
-                -- Interaction
                 if dist < 1.5 and IsControlJustReleased(0, 38) then
                     OpenLockerMenu(i)
                 end
@@ -60,6 +75,9 @@ CreateThread(function()
     end
 end)
 
+-- ============================================
+-- OPEN MENU
+-- ============================================
 function OpenLockerMenu(locationIndex)
     local location = LockerConfig.Lockers[locationIndex]
 
@@ -71,9 +89,9 @@ function OpenLockerMenu(locationIndex)
         for _, locker in ipairs(location.lockers) do
             local key = locationIndex .. '_' .. locker.id
             local data = activeLockers[key]
-            local isMine = data and data.owner == QBX.PlayerData.citizenid
+            local playerId = Framework.PlayerData().citizenid or Framework.PlayerData().identifier
+            local isMine = data and data.owner == playerId
 
-            -- Build sub-menu for owned locker
             local lockerActions = {}
 
             if isMine then
@@ -106,7 +124,7 @@ function OpenLockerMenu(locationIndex)
                                     description = 'Locker #' .. locker.id .. ' has been unrented and refunded.',
                                     type = 'success'
                                 })
-                                OpenLockerMenu(locationIndex) -- Refresh menu
+                                OpenLockerMenu(locationIndex)
                             else
                                 lib.notify({
                                     title = 'Rental Lockers',
@@ -119,7 +137,6 @@ function OpenLockerMenu(locationIndex)
                 }
             end
 
-            -- Main locker entry
             options[#options + 1] = {
                 title = 'Locker #' .. locker.id,
                 description = data
@@ -128,7 +145,6 @@ function OpenLockerMenu(locationIndex)
                 disabled = data and not isMine,
                 onSelect = function()
                     if isMine then
-                        -- Open sub-menu for this locker
                         lib.registerContext({
                             id = 'locker_actions_' .. key,
                             title = 'Locker #' .. locker.id,
@@ -142,19 +158,18 @@ function OpenLockerMenu(locationIndex)
             }
         end
 
-        -- Show main menu
         lib.registerContext({
             id = 'locker_menu',
             title = location.name,
             options = options
         })
-
         lib.showContext('locker_menu')
     end)
 end
 
-
--- RENT
+-- ============================================
+-- RENT LOCKER
+-- ============================================
 function RentLocker(locationIndex, lockerId, price)
     local confirm = lib.alertDialog({
         header = 'Rent Locker',
@@ -164,13 +179,7 @@ function RentLocker(locationIndex, lockerId, price)
     })
 
     if confirm == 'confirm' then
-        local success = lib.callback.await(
-            'stressy-lockers:rentLocker',
-            false,
-            locationIndex,
-            lockerId,
-            price
-        )
+        local success = lib.callback.await('stressy-lockers:rentLocker', false, locationIndex, lockerId, price)
 
         lib.notify({
             title = 'Rental Lockers',
