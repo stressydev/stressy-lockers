@@ -1,4 +1,6 @@
 return {
+    Framework = 'qbx', -- 'qbx' or 'qb'
+    PoliceJob = { 'police' },
     BillingCron = '0 0 * * *', -- every day
     -- examples:
     -- daily: '0 0 * * *'
@@ -16,21 +18,21 @@ return {
                 scale = 0.7
             },
             lockers = {
-                { id = 1, price = 25 },
-                { id = 2, price = 25 },
-                { id = 3, price = 25 },
-                { id = 4, price = 25 },
-                { id = 5, price = 25 },
-                { id = 6, price = 25 },
-                { id = 7, price = 25 },
-                { id = 8, price = 25 },
-                { id = 9, price = 25 },
-                { id = 10, price = 25 },
-                { id = 11, price = 50 },
-                { id = 12, price = 50 },
-                { id = 13, price = 50 },
-                { id = 14, price = 50 },
-                { id = 15, price = 50 }
+                { id = 1, price = 2500 },
+                { id = 2, price = 250 },
+                { id = 3, price = 250 },
+                { id = 4, price = 250 },
+                { id = 5, price = 250 },
+                { id = 6, price = 250 },
+                { id = 7, price = 250 },
+                { id = 8, price = 250 },
+                { id = 9, price = 250 },
+                { id = 10, price = 250 },
+                { id = 11, price = 250 },
+                { id = 12, price = 250 },
+                { id = 13, price = 250 },
+                { id = 14, price = 250 },
+                { id = 15, price = 250 }
             }
         },
         {
@@ -43,21 +45,21 @@ return {
                 scale = 0.7
             },
             lockers = {
-                { id = 1, price = 25 },
-                { id = 2, price = 25 },
-                { id = 3, price = 25 },
-                { id = 4, price = 25 },
-                { id = 5, price = 25 },
-                { id = 6, price = 25 },
-                { id = 7, price = 25 },
-                { id = 8, price = 25 },
-                { id = 9, price = 25 },
-                { id = 10, price = 25 },
-                { id = 11, price = 50 },
-                { id = 12, price = 50 },
-                { id = 13, price = 50 },
-                { id = 14, price = 50 },
-                { id = 15, price = 50 }
+                { id = 1, price = 250 },
+                { id = 2, price = 250 },
+                { id = 3, price = 250 },
+                { id = 4, price = 250 },
+                { id = 5, price = 250 },
+                { id = 6, price = 250 },
+                { id = 7, price = 250 },
+                { id = 8, price = 250 },
+                { id = 9, price = 250 },
+                { id = 10, price = 250 },
+                { id = 11, price = 250 },
+                { id = 12, price = 250 },
+                { id = 13, price = 250 },
+                { id = 14, price = 250 },
+                { id = 15, price = 250 }
             }
         },
                 {
@@ -70,21 +72,21 @@ return {
                 scale = 0.7
             },
             lockers = {
-                { id = 1, price = 25 },
-                { id = 2, price = 25 },
-                { id = 3, price = 25 },
-                { id = 4, price = 25 },
-                { id = 5, price = 25 },
-                { id = 6, price = 25 },
-                { id = 7, price = 25 },
-                { id = 8, price = 25 },
-                { id = 9, price = 25 },
-                { id = 10, price = 25 },
-                { id = 11, price = 50 },
-                { id = 12, price = 50 },
-                { id = 13, price = 50 },
-                { id = 14, price = 50 },
-                { id = 15, price = 50 }
+                { id = 1, price = 250 },
+                { id = 2, price = 250 },
+                { id = 3, price = 250 },
+                { id = 4, price = 250 },
+                { id = 5, price = 250 },
+                { id = 6, price = 250 },
+                { id = 7, price = 250 },
+                { id = 8, price = 250 },
+                { id = 9, price = 250 },
+                { id = 10, price = 250 },
+                { id = 11, price = 250 },
+                { id = 12, price = 250 },
+                { id = 13, price = 250 },
+                { id = 14, price = 250 },
+                { id = 15, price = 250 }
             }
         },
         {
@@ -97,21 +99,21 @@ return {
                 scale = 0.7
             },
             lockers = {
-                { id = 1, price = 25 },
-                { id = 2, price = 25 },
-                { id = 3, price = 25 },
-                { id = 4, price = 25 },
-                { id = 5, price = 25 },
-                { id = 6, price = 25 },
-                { id = 7, price = 25 },
-                { id = 8, price = 25 },
-                { id = 9, price = 25 },
-                { id = 10, price = 25 },
-                { id = 11, price = 50 },
-                { id = 12, price = 50 },
-                { id = 13, price = 50 },
-                { id = 14, price = 50 },
-                { id = 15, price = 50 }
+                { id = 1, price = 250 },
+                { id = 2, price = 250 },
+                { id = 3, price = 250 },
+                { id = 4, price = 250 },
+                { id = 5, price = 250 },
+                { id = 6, price = 250 },
+                { id = 7, price = 250 },
+                { id = 8, price = 250 },
+                { id = 9, price = 250 },
+                { id = 10, price = 250 },
+                { id = 11, price = 250 },
+                { id = 12, price = 250 },
+                { id = 13, price = 250 },
+                { id = 14, price = 250 },
+                { id = 15, price = 250 }
             }
                     },
                 {
@@ -124,21 +126,21 @@ return {
                 scale = 0.7
             },
             lockers = {
-                { id = 1, price = 25 },
-                { id = 2, price = 25 },
-                { id = 3, price = 25 },
-                { id = 4, price = 25 },
-                { id = 5, price = 25 },
-                { id = 6, price = 25 },
-                { id = 7, price = 25 },
-                { id = 8, price = 25 },
-                { id = 9, price = 25 },
-                { id = 10, price = 25 },
-                { id = 11, price = 50 },
-                { id = 12, price = 50 },
-                { id = 13, price = 50 },
-                { id = 14, price = 50 },
-                { id = 15, price = 50 }
+                { id = 1, price = 250 },
+                { id = 2, price = 250 },
+                { id = 3, price = 250 },
+                { id = 4, price = 250 },
+                { id = 5, price = 250 },
+                { id = 6, price = 250 },
+                { id = 7, price = 250 },
+                { id = 8, price = 250 },
+                { id = 9, price = 250 },
+                { id = 10, price = 250 },
+                { id = 11, price = 250 },
+                { id = 12, price = 250 },
+                { id = 13, price = 250 },
+                { id = 14, price = 250 },
+                { id = 15, price = 250 }
             }
         }
     }

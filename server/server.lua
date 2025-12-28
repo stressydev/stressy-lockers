@@ -1,11 +1,12 @@
 local LockerConfig = require 'config.shared'
+local Framework = require 'bridge.sv_bridge' 
 local rentedLockers = {}
 
 -- ============================================
 -- DATABASE (runtime creation)
 -- ============================================
 CreateThread(function()
-    MySQL.query([[
+    MySQL.query([[ 
         CREATE TABLE IF NOT EXISTS stressy_lockers (
             locker_key VARCHAR(50) PRIMARY KEY,
             citizenid VARCHAR(50) NOT NULL,
@@ -48,7 +49,7 @@ end)
 -- RENT LOCKER
 -- ============================================
 lib.callback.register('stressy-lockers:rentLocker', function(src, location, lockerId, price)
-    local Player = exports.qbx_core:GetPlayer(src)
+    local Player = Framework.GetPlayer(src)
     if not Player then return false end
 
     local key = location .. '_' .. lockerId
@@ -57,11 +58,11 @@ lib.callback.register('stressy-lockers:rentLocker', function(src, location, lock
         return false
     end
 
-    if exports.qbx_core:GetMoney(src, 'bank') < price then
+    if Framework.GetMoney(src, 'bank') < price then
         return false
     end
 
-    exports.qbx_core:RemoveMoney(src, 'bank', price, 'locker-rent')
+    Framework.RemoveMoney(src, 'bank', price, 'locker-rent')
 
     MySQL.insert.await(
         'INSERT INTO stressy_lockers (locker_key, citizenid, location, locker_id, price) VALUES (?, ?, ?, ?, ?)',
@@ -89,7 +90,7 @@ end)
 -- UNRENT LOCKER
 -- ============================================
 lib.callback.register('stressy-lockers:unrentLocker', function(src, lockerKey)
-    local Player = exports.qbx_core:GetPlayer(src)
+    local Player = Framework.GetPlayer(src)
     if not Player then return false end
 
     local data = rentedLockers[lockerKey]
@@ -99,7 +100,7 @@ lib.callback.register('stressy-lockers:unrentLocker', function(src, lockerKey)
 
     -- Optional: refund 100% of price
     local refundAmount = data.price
-    exports.qbx_core:AddMoney(src, 'bank', refundAmount, 'locker-unrent')
+    Framework.AddMoney(src, 'bank', refundAmount, 'locker-unrent')
 
     -- Remove locker from DB and memory
     rentedLockers[lockerKey] = nil
@@ -111,30 +112,35 @@ lib.callback.register('stressy-lockers:unrentLocker', function(src, lockerKey)
     return true
 end)
 
-
 -- ============================================
 -- OPEN STASH
 -- ============================================
-RegisterNetEvent('stressy-lockers:openStash', function(lockerName,lockerId,key)
+RegisterNetEvent('stressy-lockers:openStash', function(lockerName, lockerId, key)
     local src = source
-    local Player = exports.qbx_core:GetPlayer(src)
+    local Player = Framework.GetPlayer(src)
     if not Player then return end
 
     if rentedLockers[key] and rentedLockers[key].owner == Player.PlayerData.citizenid then
         local stashId = (lockerName..'_stash_%s'):format(lockerId)
         local label = lockerName.. ' #' .. lockerId .. ' Storage'
+
         if not exports.ox_inventory:GetInventory(stashId) then
-            exports.ox_inventory:RegisterStash(stashId, label or 'Warehouse Storage', LockerConfig.MaxSlots, LockerConfig.MaxWeight, false)
+            exports.ox_inventory:RegisterStash(stashId, label, LockerConfig.MaxSlots, LockerConfig.MaxWeight, false)
         end
+
         TriggerClientEvent('ox_inventory:openInventory', src, 'stash', { id = stashId })
     end
 end)
 
 -- ============================================
--- SYNC ON JOIN (QBX EVENT)
+-- SYNC ON JOIN (QBX/QB EVENT)
 -- ============================================
 AddEventHandler('QBX:Server:OnPlayerLoaded', function(player)
     TriggerClientEvent('stressy-lockers:syncLockers', player.source, rentedLockers)
+end)
+
+AddEventHandler('QBCore:Server:PlayerLoaded', function(playerId, xPlayer)
+    TriggerClientEvent('stressy-lockers:syncLockers', playerId, rentedLockers)
 end)
 
 -- ============================================
@@ -142,16 +148,11 @@ end)
 -- ============================================
 lib.cron.new(LockerConfig.BillingCron, function()
     for key, data in pairs(rentedLockers) do
-        local Player = exports.qbx_core:GetPlayerByCitizenId(data.owner)
+        local Player = Framework.GetPlayerByCitizenId(data.owner)
 
         if Player then
-            if exports.qbx_core:GetMoney(Player.PlayerData.source, 'bank') >= data.price then
-                exports.qbx_core:RemoveMoney(
-                    Player.PlayerData.source,
-                    'bank',
-                    data.price,
-                    'locker-rent'
-                )
+            if Framework.GetMoney(Player.PlayerData.source, 'bank') >= data.price then
+                Framework.RemoveMoney(Player.PlayerData.source, 'bank', data.price, 'locker-rent')
             else
                 -- revoke locker
                 rentedLockers[key] = nil
@@ -174,4 +175,56 @@ lib.cron.new(LockerConfig.BillingCron, function()
     end
 
     TriggerClientEvent('stressy-lockers:syncLockers', -1, rentedLockers)
+end)
+
+-- ============================================
+-- CALLBACK: GET LOCKERS BY IDENTIFIER
+-- Returns lockers rented by a specific player
+-- Restricted to police/EMS
+-- ============================================
+lib.callback.register('stressy-lockers:getLockersByIdentifier', function(source, identifier)
+    local Player = Framework.GetPlayer(source)
+    local job = Player.PlayerData.job or Player.PlayerData.job.name
+
+    if job ~= 'police' and job ~= 'ambulance' then
+        return false
+    end
+
+    local playerLockers = {}
+
+    for key, data in pairs(rentedLockers) do
+        if data.owner == identifier then
+            playerLockers[key] = {
+                owner = data.owner,
+                price = data.price
+            }
+        end
+    end
+
+    return playerLockers
+end)
+
+
+-- ============================================
+-- CALLBACK: MDT LOCKER DATA
+-- Returns all lockers with owner info for police/MDT
+-- ============================================
+lib.callback.register('stressy-lockers:getAllLockersForMDT', function(source)
+    local Player = Framework.GetPlayer(source)
+    local job = Player.PlayerData.job or Player.PlayerData.job.name
+
+    if job ~= 'police' and job ~= 'ambulance' then
+        return false
+    end
+
+    local lockersInfo = {}
+
+    for key, data in pairs(rentedLockers) do
+        lockersInfo[key] = {
+            owner = data.owner,      -- citizenid/identifier
+            price = data.price,
+        }
+    end
+
+    return lockersInfo
 end)
