@@ -20,3 +20,5 @@ elseif Framework.Type == 'esx' then
         return ESX.GetPlayerData()
     end
 end
+
+return Framework

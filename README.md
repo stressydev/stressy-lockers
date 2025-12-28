@@ -13,6 +13,18 @@ A **rental locker system** for QBX + ox_inventory with 3D text interaction, unre
 - Unrent locker with refund  
 - 3D text `[E] Rental Lockers` interaction  
 - Automatic recurring billing via `lib.cron`  
+- Police can raid lockers
+
+
+On client line 81
+You may need to update this for your own system of warrants
+```
+function AttemptRaid(locationName, lockerId, key)
+    -- This just triggers the existing stash event
+    -- Any warrant checks or custom logic can be handled externally before calling this
+    TriggerServerEvent('stressy-lockers:openStash', locationName, lockerId, key)
+end
+```
 
 ---
 
@@ -81,10 +93,13 @@ LockerConfig.Lockers = {
 ```
 | Callback                    | Description                |
 | --------------------------- | -------------------------- |
-| `rentalLocker:getLockers`   | Fetch all rented lockers   |
-| `rentalLocker:rentLocker`   | Rent a locker              |
-| `rentalLocker:unrentLocker` | Unrent a locker and refund |
-| `rentalLocker:openStash`    | Open ox_inventory stash    |
+| `stressy-lockers:getLockers`   | Fetch all rented lockers   |
+| `stressy-lockers:rentLocker`   | Rent a locker              |
+| `stressy-lockers:unrentLocker` | Unrent a locker and refund |
+| `stressy-lockers:openStash`    | Open ox_inventory stash    |
+| `stressy-lockers:getLockersByIdentifier`    | Fetch Locker by identifier    |
+| `stressy-lockers:getAllLockersForMDT`    | Get All Lockers    |
+
 
 ```
 <img src="https://jumardevelopments.sirv.com/scripts/stressy-lockers.png" width="1366" height="778" alt="">
