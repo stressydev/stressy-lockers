@@ -15,7 +15,7 @@ A **rental locker system** for QBX + ox_inventory with 3D text interaction, unre
 - Automatic recurring billing via `lib.cron`  
 - Police can raid lockers
 
-
+## Warrants Integration
 On client line 81
 You may need to update this for your own system of warrants
 ```
