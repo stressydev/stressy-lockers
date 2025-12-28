@@ -1,5 +1,6 @@
 local LockerConfig = require 'config.shared'
 local Framework = require 'bridge.cl_bridge' 
+
 local LOCKER_TEXT_STYLE = {
     scale = 0.35,
     color = vec4(255, 255, 255, 220),
@@ -27,25 +28,20 @@ end)
 -- ============================================
 -- 3D Text Helper
 -- ============================================
-function DrawText3D(coords, text, scale, color)
-    local camCoords = GetGameplayCamCoords()
-    local dist = #(coords - camCoords)
-    local fov = (1 / GetGameplayCamFov()) * 100
-    local scaleFactor = scale / dist * fov
-
-    SetTextScale(0.0, scaleFactor)
+function DrawText3D(x,y,z, text)
+    local onScreen,_x,_y=World3dToScreen2d(x,y,z)
+    local px,py,pz=table.unpack(GetGameplayCamCoords())
+    SetTextScale(0.35, 0.35)
     SetTextFont(4)
     SetTextProportional(1)
-    SetTextColour(color.x, color.y, color.z, color.w)
-    SetTextCentre(true)
-    SetTextDropshadow(0, 0, 0, 0, 55)
-    SetTextEdge(2, 0, 0, 0, 150)
-    SetTextOutline()
-    SetDrawOrigin(coords, 0)
-    BeginTextCommandDisplayText('STRING')
-    AddTextComponentSubstringPlayerName(text)
-    EndTextCommandDisplayText(0.0, 0.0)
-    ClearDrawOrigin()
+    SetTextColour(255, 255, 255, 215)
+
+    SetTextEntry("STRING")
+    SetTextCentre(1)
+    AddTextComponentString(text)
+    DrawText(_x,_y)
+    local factor = (string.len(text)) / 370
+    DrawRect(_x,_y+0.0125, 0.015+ factor, 0.03, 41, 11, 41, 68)
 end
 
 
@@ -63,7 +59,7 @@ CreateThread(function()
 
             if dist < 6.0 then
                 sleep = 0
-                DrawText3D(location.coords + vec3(0.0, 0.0, 1.1), '[E] Rental Lockers', LOCKER_TEXT_STYLE.scale, LOCKER_TEXT_STYLE.color)
+                DrawText3D(location.coords.x , location.coords.y , location.coords.z + 1.1, '[E] Rental Lockers')
 
                 if dist < 1.5 and IsControlJustReleased(0, 38) then
                     OpenLockerMenu(i)
